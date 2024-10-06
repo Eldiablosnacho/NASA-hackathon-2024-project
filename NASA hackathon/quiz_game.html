@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Quiz</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        box-sizing: border-box;
+      }
+      body{
+        background: black;
+      }
+      .quiz-app{
+        background: white;
+        width: 90%;
+        max-width: 600px;
+        margin: 100px auto 0;
+        border-radius: 10px;
+        padding: 30px;
+      }
+      .quiz-app h1{
+        font-size: 25px;
+        color:rgb(0, 30, 77);
+        font-weight: 600;
+        border-bottom: 30px;
+        padding-bottom: 30px;
+        display: block;
+      }
+      .quiz{
+        padding: 20px 0;
+      }
+      .quiz h2{
+        font-size: 18px;
+        color: rgb(0, 30, 77);
+        font-weight: 600;
+      }
+      .options{
+        background: white;
+        color: rgb(34, 34, 34,);
+        font-weight: 500;
+        width: 100%;
+        border: 1px solid  rgb(34, 34, 34,);
+        padding: 10px ;
+        margin: 10px 0;
+        text-align: left;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+      .options:hover:not([disabled]){
+        background: rgb(34, 34, 34);
+        color: white;
+      }
+      .options:disabled{
+        cursor: no-drop;
+      }
+      #next-button{
+        background: rgb(0, 30, 77);
+        color: white;
+        font-weight: 500;
+        width: 150px;
+        border: 0;
+        padding: 10px;
+        margin: 20px auto 0;
+        border-radius: 4px;
+        cursor: pointer;
+        display: none;
+      }
+      .correct{
+        background-color: rgb(154, 234, 188);
+      }
+      .incorrect{
+        background-color: rgb(255, 147, 147);
+      }
+      .message-icon{
+        height: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="quiz-app">
+      <h1>Simple Quiz</h1>
+      <hr>
+      <div class="quiz">
+        
+          <h2 id="question">First Question </h2>
+          <div id="answer-buttons">
+            <button class="options">Option A</button>
+            <button class="options">Option B</button>
+            <button class="options">Option C</button>
+            <button class="options">Option D</button>
+          </div>
+          <button id="next-button">Next</button>
+      </div>
+    </div>
+    <script>
+      const questions =[ 
+        {
+          question: "What is an exoplanet?",
+          answers:[
+          { text: "A planet outside our solar system", correct: true},
+          { text: " A planet within our solar system", correct: false},
+          { text: "A moon of another planet", correct: false},
+          { text: " A star that is similar to the Sun", correct: false},
+         ]
+        },
+        {
+          question: "Which is the nearest exoplanet to our solar system?",
+          answers:[
+          { text: "Proxima Centauri b", correct: true},
+          { text: "Kepler-452b", correct: false},
+          { text: "Gliese 667 Cc", correct: false},
+          { text: "Kepler 62f", correct: false},
+         ]
+        },
+        {
+          question: "Which is the smallest exoplanet till now?",
+          answers:[
+          { text: "55 Cancri e", correct: false},
+          { text: "Kepler-37b", correct: true},
+          { text: "HD 222237 b", correct: false},
+          { text: "TOI-4562 c", correct: false},
+         ]
+        },
+        {
+          question: "Which is the largest exoplanet till now?",
+          answers:[
+          { text: "HIP 67522 c", correct: false},
+          { text: "HD 21520 b", correct: false},
+          { text: "TIC 4672985 b", correct: false},
+          { text: "ROXs 42 Bb", correct: true},
+         ]
+        },
+        {
+        question: "What is the term for the area around a star where conditions might be right for liquid water to exist?",
+          answers:[
+          { text: "Goldilocks Zone", correct: false},
+          { text: "Oort Cloud", correct: false},
+          { text: "Habitable Zone", correct: true},
+          { text: "Kuiper Belt", correct: false},
+         ]
+        },
+        {
+          question: "Which method is primarily used to discover exoplanets?",
+          answers:[
+          { text: " Direct imaging", correct: false},
+          { text: "Gravitational lensing", correct: false},
+          { text: " Transit method", correct: true},
+          { text: "Astrometry", correct: false},
+         ]
+        }
+      ];
+        const questionElement = document.getElementById("question");
+        const answerButtons = document.getElementById("answer-buttons");
+        const nextButton = document.getElementById("next-button");
+
+        let currentQuestion = 0;
+        let score = 0;
+
+        function startGame() {
+          currentQuestionIndex = 0;
+          score = 0;
+          nextButton.innerHTML = "Next";
+          showQuestion();
+        }
+
+       function showQuestion() {
+        resetState();
+        let currentQuestion = questions[currentQuestionIndex];
+        let questionNo = currentQuestionIndex + 1;
+        questionElement.innerHTML = questionNo + '.' + currentQuestion.question;
+
+        currentQuestion.answers.forEach(answer =>{
+          const button = document.createElement("button");
+          button.innerHTML = answer.text;
+          button.classList.add("options");
+          answerButtons.appendChild(button);
+          if(answer.correct){
+            button.dataset.correct = answer.correct;
+          }
+          button.addEventListener("click", selectAnswer);
+        });
+       }
+
+       function resetState() {
+        nextButton.style.display = "none";
+        while(answerButtons.firstChild){
+          answerButtons.removeChild(answerButtons.firstChild);
+        }
+       }
+       function selectAnswer(e){
+        const selectedButton = e.target;
+        const isCorrect = selectedButton.dataset.correct === "true";
+        if(isCorrect){
+         selectedButton.classList.add("correct");
+         score++
+        }else {
+          selectedButton.classList.add("incorrect");
+        }
+        Array.from(answerButtons.children).forEach(button => {
+          if (button.dataset.correct === "true"){
+            button.classList.add("correct");
+          }
+          button.disabled = true;
+        });
+        nextButton.style.display = "block";
+      }
+      function showScore(){
+        resetState();
+        questionElement.innerHTML = `You scored ${score} out of ${questions.length}!`;
+        nextButton.innerHTML = "Play Again";
+        nextButton.style.display = "block";
+      }
+
+      function handleNextButton(){
+        currentQuestionIndex++;
+        if(currentQuestionIndex < questions.length){
+          showQuestion();
+        }else{
+          showScore();
+        }
+      }
+
+      nextButton.addEventListener("click", ()=>{
+        if(currentQuestionIndex<questions.length){
+          handleNextButton();
+        }else{
+          startGame();
+        }
+      });
+
+
+       startGame();
+    </script>
+  </body>
+</html>

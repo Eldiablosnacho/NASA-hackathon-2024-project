@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Exoplanet Explorer</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&family=Raleway:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        font-family: "Nunito Sans", sans-serif;
+        background-color: #000;
+      }
+      #info {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        color: white;
+        font-size: 24px;
+        font-weight: 600;
+      }
+      #controls {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+      }
+      .btn-custom {
+        font-size: 16px;
+        font-weight: 600;
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: white;
+        border-radius: 5px;
+      }
+      .btn-custom:hover {
+        background-color: #0056b3;
+      }
+      #planetInfo {
+        position: absolute;
+        top: 50px;
+        left: 10px;
+        color: white;
+        background-color: rgba(0, 0, 0, 0.9);
+        padding: 20px;
+        max-width: 300px;
+        display: none;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.5);
+      }
+      #planetInfo h2 {
+        font-family: "Raleway", sans-serif;
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 15px;
+      }
+      #planetInfo p {
+        font-family: "Nunito Sans", sans-serif;
+        font-size: 18px;
+        font-weight: 400;
+      }
+      #planetInfo .chances {
+        font-weight: 700;
+        font-size: 20px;
+        color: #ffcc00;
+      }
+      #comparison {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        display: none;
+      }
+      h2 {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+      p {
+        font-size: 16px;
+        font-weight: 400;
+        font-family: 'Times New Roman', Times, serif;
+      }
+
+    </style>
+  </head>
+  <body>
+
+     
+      <div id="info">Interactive Exoplanet Explorer</div>
+  
+   
+    <div id="controls">
+      <button id="prevButton" class="btn-custom btn">Previous Planet</button>
+      <button id="nextButton" class="btn-custom btn">Next Planet</button>
+      <button id="compareButton" class="btn-custom btn">
+        Compare with Earth
+      </button>
+    </div>
+    <div id="planetInfo"></div>
+    <div id="comparison" style="display: none">
+      <button id="closeComparison" class="btn btn-danger">Close</button>
+      <h2>Size Comparison</h2>
+      <div
+        style="
+          display: flex;
+          align-items: center;
+          justify-content: space-around;
+        "
+      >
+        <div>
+          <div
+            style="
+              width: 100px;
+              height: 100px;
+              background-color: blue;
+              border-radius: 50%;
+            "
+          ></div>
+          <p>Earth</p>
+        </div>
+        <div id="comparisonPlanet"></div>
+      </div>
+      <p id="comparisonText"></p>
+
+    </div>
+ 
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(
+          75,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          1000
+        );
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const planets = [
+          {
+            name: "Kepler-186f",
+            texture: "kepler186f.jpg",
+            size: 1.1,
+            info: "Kepler-186f is the first Earth-size planet discovered in the potentially 'habitable zone' around another star. It orbits a red dwarf star about 500 light-years from Earth.",
+            chances: "Medium (40%)",
+          },
+          {
+            name: "Proxima Centauri b",
+            texture: "Proxima-b-.jpg",
+            size: 1.3,
+            info: "Proxima Centauri b is the closest known exoplanet to our solar system.",
+            chances: "High (60%)",
+          },
+          {
+            name: "TRAPPIST-1e",
+            texture: "TRAPPIST-1e_artist_impression_2018.png",
+            size: 0.92,
+            info: "TRAPPIST-1e is one of seven Earth-size planets orbiting the ultra-cool dwarf star TRAPPIST-1, about 39 light-years from Earth.",
+            chances: "High (70%)",
+          },
+          {
+            name: "K2-18b",
+            texture: "k2-18b.webp",
+            size: 2.6,
+            info: "K2-18b is a super-Earth exoplanet orbiting within the habitable zone of the red dwarf star K2-18.",
+            chances: "Medium (50%)",
+          },
+          {
+            name: "Gliese 667 Cc",
+            texture: "Gliese_667_Cc.jpg",
+            size: 1.5,
+            info: "Gliese 667 Cc is a super-Earth exoplanet that orbits within the habitable zone of the red dwarf Gliese 667 C.",
+            chances: "Medium (45%)",
+        },
+        ];
+
+        const textureLoader = new THREE.TextureLoader();
+        const planetGeometry = new THREE.SphereGeometry(1, 32, 32);
+        let currentPlanetIndex = 0;
+        let currentPlanetMesh = null;
+        let nextPlanetMesh = null;
+
+        const starGeometry = new THREE.BufferGeometry();
+        const starMaterial = new THREE.PointsMaterial({ color: 0xffffff });
+        const starVertices = [];
+        for (let i = 0; i < 10000; i++) {
+          const x = THREE.MathUtils.randFloatSpread(2000);
+          const y = THREE.MathUtils.randFloatSpread(2000);
+          const z = THREE.MathUtils.randFloatSpread(2000);
+          starVertices.push(x, y, z);
+        }
+        starGeometry.setAttribute(
+          "position",
+          new THREE.Float32BufferAttribute(starVertices, 3)
+        );
+        const stars = new THREE.Points(starGeometry, starMaterial);
+        scene.add(stars);
+
+        function createPlanet(planet) {
+          const planetMaterial = new THREE.MeshBasicMaterial({
+            map: textureLoader.load(planet.texture),
+          });
+          const planetMesh = new THREE.Mesh(planetGeometry, planetMaterial);
+          planetMesh.scale.set(planet.size, planet.size, planet.size);
+          return planetMesh;
+        }
+
+        function updateInfo() {
+          const planetData = planets[currentPlanetIndex];
+          const planetInfo = document.getElementById("planetInfo");
+          planetInfo.innerHTML = `
+                <h2>${planetData.name}</h2>
+                <p>${planetData.info}</p>
+                <p class="chances">Chances of being habitable: ${planetData.chances}</p>
+            `;
+          planetInfo.style.display = "block";
+        }
+
+        function animatePlanetTransition(direction) {
+          const currentPlanet = planets[currentPlanetIndex];
+          const nextIndex =
+            (currentPlanetIndex + direction + planets.length) % planets.length;
+          const nextPlanet = planets[nextIndex];
+
+          nextPlanetMesh = createPlanet(nextPlanet);
+          nextPlanetMesh.position.set(0, 0, -10); // Start from behind
+          scene.add(nextPlanetMesh);
+
+          const radius = 5;
+          const duration = 1000; // milliseconds
+
+          new TWEEN.Tween(currentPlanetMesh.position)
+            .to({ x: -radius * direction, z: 0 }, duration)
+            .easing(TWEEN.Easing.Quadratic.InOut)
+            .start();
+
+          new TWEEN.Tween(nextPlanetMesh.position)
+            .to({ x: 0, z: -5 }, duration)
+            .easing(TWEEN.Easing.Quadratic.InOut)
+            .onComplete(() => {
+              scene.remove(currentPlanetMesh);
+              currentPlanetMesh = nextPlanetMesh;
+              nextPlanetMesh = null;
+              currentPlanetIndex = nextIndex;
+              updateInfo();
+            })
+            .start();
+        }
+
+        function comparePlanet() {
+          const comparisonElement = document.getElementById("comparison");
+          const planetData = planets[currentPlanetIndex];
+          const comparisonPlanet = document.getElementById("comparisonPlanet");
+          const comparisonText = document.getElementById("comparisonText");
+
+          comparisonPlanet.innerHTML = `
+                <div style="width: ${100 * planetData.size}px; height: ${
+            100 * planetData.size
+          }px; background-color: orange; border-radius: 50%;"></div>
+                <p>${planetData.name}</p>
+            `;
+          comparisonText.textContent = `${
+            planetData.name
+          } is ${planetData.size.toFixed(2)} times the size of Earth.`;
+          comparisonElement.style.display = "block";
+        }
+
+
+        document.getElementById("nextButton").addEventListener("click", (event) => {
+          animatePlanetTransition(1);
+        });
+
+        document.getElementById("prevButton").addEventListener("click", (event) => {
+          animatePlanetTransition(-1);
+        });
+
+
+
+        document
+          .getElementById("compareButton")
+          .addEventListener("click", comparePlanet);
+
+        document
+          .getElementById("closeComparison")
+          .addEventListener("click", () => {
+            document.getElementById("comparison").style.display = "none";
+          });
+
+        currentPlanetMesh = createPlanet(planets[currentPlanetIndex]);
+        currentPlanetMesh.position.set(0, 0, -5);
+        scene.add(currentPlanetMesh);
+        updateInfo();
+
+        function animate(time) {
+          requestAnimationFrame(animate);
+          TWEEN.update(time);
+          if (currentPlanetMesh) {
+            currentPlanetMesh.rotation.y += 0.01;
+          }
+          if (nextPlanetMesh) {
+            nextPlanetMesh.rotation.y += 0.01;
+          }
+          renderer.render(scene, camera);
+        }
+        animate();
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Exoplanet Explorer</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: "Nunito Sans", sans-serif;
+            background-color: #000;
+            position: relative;
+        }
+        .header {
+            height: 55px;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-bottom: none;
+            z-index: 100;
+        }
+        .left-section {
+            color: white;
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+        }
+        .right-section {
+            width: 180px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        .game-button {
+            position: relative;
+            background: transparent;
+            border: none;
+        }
+        .game-button .tooltip{
+          font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+          font-size: 12px;
+          position: absolute;
+          background-color: grey;
+          color: white;
+          bottom: -44px;
+          padding-top: 8px;
+          padding-bottom: 8px;
+          padding-left: 4px;
+          padding-right: 4px;
+          border-radius: 2px;
+          opacity: 0;
+          transition: opacity 0.15s;
+          pointer-events: none;
+          white-space: nowrap;
+        }
+        .game-button:hover .tooltip{
+          opacity: 1;
+        }
+        .game-js-button {
+            height: 30px;
+            margin-left: 24px;
+            margin-right: 24px;
+            margin-top: 10px;
+        }
+        #info {
+            margin-top: 10px;
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        main {
+            position: relative;
+            z-index: 10;
+            color: white;
+            padding: 70px 20px 20px;
+        }
+        p, h1, h2, h3 {
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        .project-link{
+          font-size: 20px;
+          color: blue;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="left-section">
+            <div id="info">Interactive Exoplanet Explorer</div>
+        </div>
+        <div class="right-section">
+            <a href="quiz_game.html">
+                <button class="game-button">
+                    <img src="5930147.png" class="game-js-button" alt="Quiz Game">
+                    <div class="tooltip">Play game</div>
+                </button>
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <h1>Welcome to the Exoplanet Explorer</h1>
+        <p>An exoplanet is any planet beyond our solar system. Most of them orbit other stars, but some free-floating exoplanets, called rogue planets, are untethered to any star. We have confirmed more than 5,600 exoplanets out of the billions that we believe exist.</p>
+        <p>Discover the wonders of distant worlds as you navigate through our interactive solar system.</p>
+        
+        <h2>Featured Exoplanets</h2>
+        <ul>
+          <li>Kepler-186f</li>
+          <li>TRAPPIST-1e</li>
+          <li>K2-18b</li>
+          <li>Gliese 667 Cc</li>
+          <li>Proxima Centauri b</li>
+        </ul>
+        <a href="project.html">
+          <p class="project-link" target="_blank" >  Click here Explore more </p>
+        </a>
+        <p>Explore some of the most fascinating exoplanets discovered to date, including super-Earths, hot Jupiters, and potentially habitable worlds.</p>
+
+    </main>
+ 
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.insertBefore(renderer.domElement, document.body.firstChild);
+
+        const starGeometry = new THREE.BufferGeometry();
+        const starMaterial = new THREE.PointsMaterial({ color: 0xffffff });
+        const starVertices = [];
+
+        for (let i = 0; i < 10000; i++) {
+            const x = THREE.MathUtils.randFloatSpread(2000);
+            const y = THREE.MathUtils.randFloatSpread(2000);
+            const z = THREE.MathUtils.randFloatSpread(2000);
+            starVertices.push(x, y, z);
+        }
+        
+        starGeometry.setAttribute(
+            "position",
+            new THREE.Float32BufferAttribute(starVertices, 3)
+        );
+
+        const stars = new THREE.Points(starGeometry, starMaterial);
+        scene.add(stars);
+
+        camera.position.z = 500;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            stars.rotation.x += 0.0005;
+            stars.rotation.y += 0.0005;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', function() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
